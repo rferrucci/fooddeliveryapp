@@ -2,7 +2,6 @@
 /*this code was used to login to an app I built that was connected to a clients WordPress installation, db.file.php connects to
 a wordpress database. The app enabled the restaurant clients of her food delivery service to receive orders.
 */
-
 include_once('db_file.php');
 
 $con = mysqli_connect(DB_HOST,DB_USER,DB_PASSWORD,DB_NAME) or die('Unable to Connect');
@@ -23,7 +22,7 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
 	$stmt->close();
 	if ($result->num_rows != 0){
 		echo "success";
-		//client wanted to know when restaurants were connected
+		//client wanted to know when restaurants were connected, 1 is online 0 is offline
 		$sql = "UPDATE wp_restaurants SET online=1 WHERE email = ?";
 		$stmt = $con->prepare($sql);
 		$stmt-> bind_param('s', $email);
