@@ -1,12 +1,19 @@
 <?php
-/*
-for client's food delivery app, where restaurants receive orders from her WordPress installation.
+/**
+ * getOrders.php
+ *
+ * for client's food delivery app, where restaurants receive orders from her WordPress installation.
 When client associates a restaurant with an order, order status is set as "submitted" in the order_status table (previously does not exist).
 When the app downloads the data and this script is accessed, the status is changed to "sent" meaning that it has been sent to the app.
 Restaurants then will intention that they received the order (which will be changed in the database in the update_order script to "received")
 and finally changed to completed when it has been fullfilled. At this point, it is no longer received on the restaurant's end but still
 listed on the backend until client delivery service closes the order.
-*/
+ *
+ * @author     Ronald R. Ferrucci
+ * @copyright  2017 Ronald R. Ferrucci
+ * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
+
+ */
 
 //connect to WordPress database
 require_once('db_file.php');
