@@ -1,7 +1,15 @@
 <?php
-/*this code was used to login to an app I built that was connected to a clients WordPress installation, db.file.php connects to
+/**
+ * login.php
+ *
+ * this code was used to login to an app I built that was connected to a clients WordPress installation, db.file.php connects to
 a wordpress database. The app enabled the restaurant clients of her food delivery service to receive orders.
-*/
+ *
+ * @author     Ronald R. Ferrucci
+ * @copyright  2017 Ronald R. Ferrucci
+ * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
+ */
+
 include_once('db_file.php');
 
 $con = mysqli_connect(DB_HOST,DB_USER,DB_PASSWORD,DB_NAME) or die('Unable to Connect');
