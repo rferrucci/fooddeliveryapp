@@ -1,6 +1,15 @@
 <?php
-//built for client's food delivery service app, where restaurants recieve orders from her WordPress installation
-//logs them out of the database
+
+/**
+ * logout.php
+ *
+ * logs restaurants out of the database
+ *
+ * @author     Ronald R. Ferrucci
+ * @copyright  2017 Ronald R. Ferrucci
+ * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
+ */
+
 
 //connect to wordpress database
 require_once('db_file.php');
