@@ -330,16 +330,12 @@ if (isset($_POST)){
 		$res=new Restaurant($_POST['email'],$_POST['restaurant']);
 		$res->insert();
 		$restaurants[$res->id] = $res;
-		print_r($restaurants);
 		$email = trim($_POST['email']);
 		$restaurant = $_POST['restaurant'];
-		//$rid=666;
 		?><script>
 		var link = "<?php echo $link; ?>";
-		
 		var rid = "rid-" + <?php echo $rid; ?>;
-		alert(rid);
-		var email = "<?php echo $email ?>";
+		var email = "<?php echo $email; ?>";
 		var restaurant = "<?php echo $restaurant ?>";
 		$(document).ready(function(){
 			var new_row ='<tr id="rid-' + rid + '">';
@@ -356,3 +352,4 @@ if (isset($_POST)){
 		</script><?php
 	}
 }
+
