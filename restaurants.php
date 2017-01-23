@@ -18,37 +18,6 @@
 
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
 
-<?php 
-
-$link = "http://$_SERVER[HTTP_HOST]$_SERVER[PHP_SELF]";
-
-require_once('db_file.php');
-
-$con = new mysqli(DB_HOST,DB_USER,DB_PASSWORD,DB_NAME);
-
-if (mysqli_connect_errno($con))
-{
-   echo "Failed to connect to MySQL: " . mysqli_connect_error();
-}
-
-$con->set_charset("utf8");
-
-if (isset($_GET)){
-	$id= $_GET['id'];
-	$query = "SELECT * from wp_restaurants WHERE id=?";
-	$stmt = $con->prepare($query);
-	$stmt-> bind_param('d',$id);
-	$stmt->execute();
-	$result = $stmt->get_result();
-	$row = $result->fetch_array();
-	$stmt->close();
-	$selected=$row['email'];
-	if ($_GET['action']=='edit') $button = 'edit';
-	else if ($_GET['action']=='delete') $button = 'delete';
-
-}
-?>
-
 <style>
 
  form#restaurant-form fieldset {
@@ -181,6 +150,38 @@ class Restaurant{
 		}
 }
 
+
+$link = "http://$_SERVER[HTTP_HOST]$_SERVER[PHP_SELF]";
+
+require_once('db_file.php');
+
+$con = new mysqli(DB_HOST,DB_USER,DB_PASSWORD,DB_NAME);
+
+if (mysqli_connect_errno($con))
+{
+   echo "Failed to connect to MySQL: " . mysqli_connect_error();
+}
+
+$con->set_charset("utf8");
+
+if (isset($_GET)){
+	$id= $_GET['id'];
+	$query = "SELECT * from wp_restaurants WHERE id=?";
+	$stmt = $con->prepare($query);
+	$stmt-> bind_param('d',$id);
+	$stmt->execute();
+	$result = $stmt->get_result();
+	$row = $result->fetch_array();
+	$stmt->close();
+	$selected=$row['email'];
+	if ($_GET['action']=='edit') $button = 'edit';
+	else if ($_GET['action']=='delete') $button = 'delete';
+
+}
+
+
+
+
 function get_restaurants( $per_page = 5, $page_number = 1 ) {
 	//get list of restaurants from the database
 	global $con;
@@ -224,14 +225,12 @@ $emails = array();
 		
 foreach ($used as $e){
 	array_push($emails, $e->email);
-
-
-}
+	}
 
 ?>
 <h2>Restaurant Form</h2>
 
-<form action=" <?php echo $link ?>" method="post" name="submit_restaurant_info" id="restaurant-form">
+<form action="#" method="post" name="submit_restaurant_info" id="restaurant-form">
 <fieldset>
 <legend>Insert or update restaurant</legend>
 <label for="restaurant">Restaurant: </label><input type="text" name="restaurant" id="restaurant" value=" <?php echo $row['restaurant'] ?> "></input><br>
@@ -357,4 +356,3 @@ if (isset($_POST)){
 		</script><?php
 	}
 }
-?>
