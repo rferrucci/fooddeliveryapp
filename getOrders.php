@@ -162,7 +162,7 @@ function getOrderItems($order_id){
 		$order_items .= getAdditionalOrderInfo($product_id,$item_id,'_product_attributes');
 		
 	        //get addons, fries, sour cream, etc.    
-		$order_items .= getAdditionalOrderInfo($product_id,$item_id,'_addons');
+		$order_items .= getAdditionalOrderInfo($product_id,$item_id,'_product_addons');
 		}
 	        $query="SELECT * FROM wp_order_status WHERE order_id=$order_id";
 	        $results = mysqli_query($con,$query);
