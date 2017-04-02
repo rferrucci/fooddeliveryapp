@@ -1,3 +1,4 @@
+<html>
 <?php
 /**
  * restaurants.php
@@ -15,24 +16,11 @@
  * @copyright  2017 Ronald R. Ferrucci
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
  */
+ ?>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> <!-- load bootstrap via CDN -->
 
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
-
 <style>
-
- form#restaurant-form fieldset {
-     width: 350px;
-     display: inline-block;
- }
-
-form#restaurant-form input, select, button{
-	float:right;
-}
-
- fieldset label{
-     margin-right: 10px;
-     position: relative;
- }
  
  table#restaurantTable{
 	width: 600px;
@@ -41,171 +29,23 @@ form#restaurant-form input, select, button{
   table#restaurantTable th{
 	text-align:left;
  }
-
-
  table#restaurantTable td{
 	padding: 5px;
 	margin: 5px 25px;
  }
-
 </style>
-
-
 <?php 
 
-class Restaurant{
- 	var $email;
-	var $id;
-	var $restaurant;
-	var $online;
-
-	function __construct($email,$restaurant,$online=0, $id =null)
-   	{
-	 	$this->email = $email;
-	       	$this->restaurant = $restaurant;
-	       	$this->online= $online;
-	       	$this->id = $id;
-   	}
-   	function delete() {
-		//delete resturant from the database
-		global $con;
-		$sql = "DELETE FROM wp_restaurants WHERE id=?";
-		$id = $this->id;
-		$stmt = $con->prepare($sql);
-		$stmt->bind_param('d',$id);
-		$stmt->execute();	
-		$restaurant = str_replace("\'", '&#8217;', $this->restaurant);
-		if (!$stmt->execute()) echo 'deletion failed';
-		else echo 'Restaurant ' . $restaurant  . ' deleted<br>';
-	
-		unset($this);
-	 	$stmt->close();
-	}
-	function insert() {
-		//insert new resturant from the database
-		global $con;
-		$this->password(12);
-
-		$sql = "INSERT INTO wp_restaurants (email, password, online, restaurant)";
-		$sql .= "VALUES (?, ?, 0, ?)";
-		
-		$stmt = $con->prepare($sql);
-		$stmt->bind_param('sss',$this->email,$this->hash, $this->restaurant);
-		$restaurant = str_replace("\'", '&#8217;', $this->restaurant);
-		if (!$stmt->execute()) echo 'creation failed';
-		else {
-			$insert = 'Restaurant ' . $restaurant  . ' created in database with email: ' . $this->email . '.<br>';
-			$insert .= 'Password will be sent to email.';
-			echo $insert;
-			//$msg = 'your password for the food delivery service is ' .$password .' . ';
-			//$msg .= 'Use this email for logging into the app.';
-			//mail($email,$subject,$msg);
-		}
-		$id = $stmt->insert_id;;
-		$this->id = $id;
-		$stmt->close();	
-	}
-	function update($email, $restaurant) {
-		//update resturant information in the database
-		global $con;
-		$this->password(12);
-		$sql = "UPDATE wp_restaurants ";
-		$sql .= "SET email=?, password=?, restaurant=? WHERE id=?";
-		$id = $this->id;
-		$stmt = $con->prepare($sql);
-		$stmt->bind_param('sssd',$email,$this->hash, $restaurant,$id);
-		$restaurant = str_replace("\'", '&#8217;', $restaurant);
-		if (!$stmt->execute()) echo 'update failed';
-		else {
-			$insert = 'Restaurant ' . $restaurant . ' updated in database with email: ' . $email . '.<br>';
-			$insert .= 'New password will be sent to email.';
-			echo $insert;
-			//$msg = 'your password for the food delivery service is ' .$password .' . ';
-			//$msg .= 'Use this email for logging into the app.';
-			//mail($email,$subject,$msg);
-		}
-		$this->email=$email;
-		$this->restaurant=$restaurant;
-		$stmt->close();	
-	}
-	function password(
-		#this function generates a random password of length from 8 to $max.
-		$max,
-		$keyspace = 'VnWkSCY75Fys!EL24fUoNguHabv1XPeqQ8pRcM3xz9irIjOGBDmwh@l6JZ0tTKdA'
-		) {
-		$password = '';
-		$min = 8;
-		//takes maximum length as input and generates a random length for the password with min length of 8.
-		//$keyspace has been randomly shuffled in python
-		$length = rand($min, $max +1);
-		$max = mb_strlen($keyspace, '8bit') - 1;
-		if ($max < 1) {
-			throw new Exception('$keyspace must be at least two characters long');
-			}
-		for ($i = 0; $i < $length; ++$i) {
-			$password .= $keyspace[mt_rand(0, $max)];
-			}
-		$this->password = $password;
-		$this->hash = hash ( "sha256" , $password);
-		}
-}
-
-
 $link = "http://$_SERVER[HTTP_HOST]$_SERVER[PHP_SELF]";
-
 require_once('db_file.php');
-
 $con = new mysqli(DB_HOST,DB_USER,DB_PASSWORD,DB_NAME);
-
 if (mysqli_connect_errno($con))
 {
    echo "Failed to connect to MySQL: " . mysqli_connect_error();
 }
-
 $con->set_charset("utf8");
 
-if (isset($_GET)){
-	$id= $_GET['id'];
-	$query = "SELECT * from wp_restaurants WHERE id=?";
-	$stmt = $con->prepare($query);
-	$stmt-> bind_param('d',$id);
-	$stmt->execute();
-	$result = $stmt->get_result();
-	$row = $result->fetch_array();
-	$stmt->close();
-	$selected=$row['email'];
-	if ($_GET['action']=='edit') $button = 'edit';
-	else if ($_GET['action']=='delete') $button = 'delete';
-
-}
-
-
-
-
-function get_restaurants( $per_page = 5, $page_number = 1 ) {
-	//get list of restaurants from the database
-	global $con;
-	$sql = "SELECT * FROM wp_restaurants";
-
-	$sql .= " LIMIT $per_page";
-	$sql .= ' OFFSET ' . ( $page_number - 1 ) * $per_page;
-
-	$stmt = $con->prepare($sql);
-	$stmt->execute();
-
-	$results = $stmt->get_result();
-	$restaurants = array();
-	while ($res = $results->fetch_assoc()){
-		$id=$res['ID'];
-		$restaurant=new Restaurant($res['email'],$res['restaurant'],$res['online'],$res['ID']);
-		$restaurants[$id] = $restaurant;		
-		}
-	return $restaurants;	
-	}
-
-$restaurants = get_restaurants();
-// count number of restaurant objects;
-$NRestaurants =count($restaurants);
+include_once("restaurant-class");
 
 
 //here we are getting a list of emails associated with shop managers, a particular user profile from woocommerce.		
@@ -214,48 +54,57 @@ $query = "SELECT user_email
 	JOIN wp_usermeta on wp_users.ID=wp_usermeta.user_id 
 	WHERE wp_usermeta.meta_key='wp_capabilities' 
 	AND wp_usermeta.meta_value LIKE '%shop_manager%'";
-
 $shop_managers = $wpdb->get_results($query);
 		
 //we also want to get emails that are already associated with restaurants
 $query = "SELECT email FROM wp_restaurants";
-
 $used = $wpdb->get_results($query);
 $emails = array();
 		
 foreach ($used as $e){
 	array_push($emails, $e->email);
 	}
-
 ?>
-<h2>Restaurant Form</h2>
 
-<form action="#" method="post" name="submit_restaurant_info" id="restaurant-form">
+<body>
+
+<div class="col-sm-6 col-sm-offset-3">
+
+<h2>Restaurant Form</h2>
+<form name="submit_restaurant_info" id="restaurantForm">
 <fieldset>
+
 <legend>Insert or update restaurant</legend>
-<label for="restaurant">Restaurant: </label><input type="text" name="restaurant" id="restaurant" value=" <?php echo $row['restaurant'] ?> "></input><br>
-<label for"email">Email: <label><select name="email" id="email" >
+    <div id="restaurant-group" class="form-group">
+
+<label for="restaurant">Restaurant: </label><input type="text" name="restaurant" id="restaurant" class="form-control" value="<?php echo $row['restaurant'] ?> "></input>
+ <span class="help-block"></span>
+    </div>
+
+<br>
+<label for"email">Email: <label><select class="form-control" name="email" id="email" >
 <option placeholder value="">Select Email Address</option>
+
 <?php
 
 foreach ($shop_managers as $email){
-	if ($email->user_email == $selected) //if editing, email will already be selected
+	if ($_GET['email'] == $email->user_email)
 		echo '<option selected value =' . $email->user_email . '>' . $email->user_email . '</option>';
-	else if (in_array($email->user_email, $emails)) //if already associated with a restaurant, email will be unable to be chosen
+	else if ($email->disabled == 'yes') //if already associated with a restaurant, email will be unable to be chosen
 		echo '<option disabled value =' . $email->user_email . '>' . $email->user_email . '</option>';
 	else // otherwise, all is good
 		echo '<option value =' . $email->user_email . '>' . $email->user_email . '</option>';		
 }
-
 ?>
+
+
 </select><br>
-<input type="hidden" name="ID" value = <?php echo $id ?> >
+<input type="hidden" name="ID" name="ID" value = <?php echo $id ?> >
 <br>
 <?php
-
-if ($button == 'edit') echo '<button id="submitChanges" name="submitChanges" value="update">Update</button>';
-else if ($button == 'delete') echo '<button id="submitChanges" name="submitChanges" value="delete">Delete</button>';
-else echo '<button id="submitChanges" name="submitChanges" value="insert">New</button>';
+if ($button == 'edit') echo '<button class="form-control" id="submit" name="submitChanges" value="update">Update</button>';
+else if ($button == 'delete') echo '<button id="submit" class="form-control" name="submitChanges" value="delete">Delete</button>';
+else echo '<button id="submit" class="form-control" name="submitChanges" value="insert">New</button>';
 echo '<br>';
 ?>
 
@@ -269,13 +118,11 @@ echo '<h2>Food Delivery Restaurants</h2><p>';
 if ($NRestaurants != 0){echo $NRestaurants . ' restaurants are available<br>'; }
 else {echo 'No restaurants avaliable<br>'; }
 echo '</p>';
-
 ?>
 <table id="restaurantTable">
 <thead><tr><th>Edit&#47;Delete</th><th>Restaurant</th><th>Email</th><th>Online</th></tr></thead>
 <tbody>
 <?php
-
 foreach ($restaurants as $r){
 	echo '<tr class="rid" id="rid-'. $r->id .'">';
 	echo '<td><a href =' . $link . '?action=edit&id=' . $r->id . '>Edit</a><br>';
@@ -293,9 +140,10 @@ foreach ($restaurants as $r){
 </tbody>
 </table>
 
+</div>
+</body>
 	
 <?php	
-
 if (isset($_POST)){
 	if (isset($_POST['ID'])){
 		$rid = $_POST['ID'];
@@ -308,7 +156,6 @@ if (isset($_POST)){
 		        $("#" + rid).remove();
 		});	
 		</script><?php
-
 	}
 	else if ($_POST['submitChanges'] == 'update'){
 		$restaurants[$id]->update($_POST['email'],$_POST['restaurant']);
@@ -324,7 +171,6 @@ if (isset($_POST)){
 		});
 		
 		</script><?php
-
 	}
 	else if ($_POST['submitChanges'] == 'insert'){
 		$res=new Restaurant($_POST['email'],$_POST['restaurant']);
@@ -352,4 +198,5 @@ if (isset($_POST)){
 		</script><?php
 	}
 }
+
 
