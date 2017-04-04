@@ -11,10 +11,14 @@ $(document).ready(function(){
     var submit = $('button[name=submitChanges]').val(); 
     var ID = $('input[name=ID]').val(); 
     
-    if (submit=='delete') $('#rid-' + ID).remove();
+    if (submit=='delete') $('#rid-' + ID).remove(); #delete record
     else if (submit=='update'){
-    	$("#rid-" + ID ).find(".restaurant").html(restaurant);
-	$("#rid" + ID ).find(".email").html(email);
+	# here, we are updating the restaurant name and email from the record.
+    	var oldEmail = $("#rid-" + ID ).find(".email").html();
+    	$("#rid-" + ID ).find(".restaurant").html(restaurant); 
+	$("#rid-" + ID ).find(".email").html(email);
+	$("select[name=email]").find('#' + email).attr('disabled',false);
+	$("select[name=email]").find('#' + email).attr('selected',true);
 	}
     else if (submit=='insert'){
     	var link = $(location).attr('href');
