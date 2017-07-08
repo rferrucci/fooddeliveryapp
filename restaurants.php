@@ -174,9 +174,11 @@ function get_restaurants( $per_page = 5, $page_number = 1 ) {
 	$restaurants = array();
 	while ($res = $results->fetch_assoc()){
 
-		$id=$res['ID'];
+		$id=$res['id'];
 		$restaurant=new Restaurant($res['email'],$res['restaurant'],$res['online'],$res['id']);
-		array_push($restaurants, $restaurant);
+
+		$restaurants[$id] = $restaurant;
+		#array_push($restaurants, $restaurant[$id]);
 		}
 	return $restaurants;	
 	}
@@ -205,8 +207,8 @@ $used = $stmt->get_result();
 
 #$used = $wpdb->get_results($query);
 $emails = array();
-	
-foreach ($used as $e){
+
+while ($e = $used->fetch_assoc()){
 	array_push($emails, $e['email']);
 	}
 ?>
@@ -219,7 +221,8 @@ foreach ($used as $e){
 <label for"email">Email: <label><select name="email" id="email" >
 <option placeholder value="">Select Email Address</option>
 <?php
-foreach ($shop_managers as $email){
+
+while ($email = $shop_managers->fetch_assoc()){
 	if ($email['user_email'] == $selected) //if editing, email will already be selected
 		echo '<option selected value =' . $email['user_email'] . '>' . $email['user_email'] . '</option>';
 	else if (in_array($email['user_email'], $emails)) //if already associated with a restaurant, email will be unable to be chosen
@@ -273,14 +276,17 @@ foreach ($restaurants as $r){
 	
 <?php	
 if (isset($_POST)){
+
 	if (isset($_POST['ID'])){
-		$rid = $_POST['ID'];
+		$id = $_POST['ID'];
 		}
 	if ($_POST['submitChanges'] == 'delete'){
-		$restaurants[$id]->delete();
+		#$restaurants[$id]->delete();
+	
 		?><script>
-		var rid = "rid-" + <?php echo $rid ?>;
+		var rid = "rid-" + <?php echo $id ?>;
 		$(document).ready(function(){
+				
 		        $("#" + rid).remove();
 		});	
 		</script><?php
@@ -290,7 +296,7 @@ if (isset($_POST)){
 		$email = trim($_POST['email']);
 		$restaurant = $_POST['restaurant'];
 		?><script>
-		var rid = "rid-" + <?php echo $rid; ?>;
+		var rid = "rid-" + <?php echo $id; ?>;
 		var email = "<?php echo $email ?>";
 		var restaurant = "<?php echo $restaurant ?>";
 		$(document).ready(function(){
@@ -308,7 +314,7 @@ if (isset($_POST)){
 		$restaurant = $_POST['restaurant'];
 		?><script>
 		var link = "<?php echo $link; ?>";
-		var rid = "rid-" + <?php echo $rid; ?>;
+		var rid = "rid-" + <?php echo $id; ?>;
 		var email = "<?php echo $email; ?>";
 		var restaurant = "<?php echo $restaurant ?>";
 		$(document).ready(function(){
