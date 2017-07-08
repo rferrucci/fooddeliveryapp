@@ -15,6 +15,7 @@
  * @copyright  2017 Ronald R. Ferrucci
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
  */
+ ?>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
 <style>
  form#restaurant-form fieldset {
@@ -138,12 +139,14 @@ class Restaurant{
 }
 $link = "http://$_SERVER[HTTP_HOST]$_SERVER[PHP_SELF]";
 require_once('db_file.php');
+
 $con = new mysqli(DB_HOST,DB_USER,DB_PASSWORD,DB_NAME);
 if (mysqli_connect_errno($con))
 {
    echo "Failed to connect to MySQL: " . mysqli_connect_error();
 }
 $con->set_charset("utf8");
+
 if (isset($_GET)){
 	$id= $_GET['id'];
 	$query = "SELECT * from wp_restaurants WHERE id=?";
@@ -157,24 +160,28 @@ if (isset($_GET)){
 	if ($_GET['action']=='edit') $button = 'edit';
 	else if ($_GET['action']=='delete') $button = 'delete';
 }
+
 function get_restaurants( $per_page = 5, $page_number = 1 ) {
 	//get list of restaurants from the database
 	global $con;
 	$sql = "SELECT * FROM wp_restaurants";
 	$sql .= " LIMIT $per_page";
 	$sql .= ' OFFSET ' . ( $page_number - 1 ) * $per_page;
+	
 	$stmt = $con->prepare($sql);
 	$stmt->execute();
 	$results = $stmt->get_result();
 	$restaurants = array();
 	while ($res = $results->fetch_assoc()){
+
 		$id=$res['ID'];
-		$restaurant=new Restaurant($res['email'],$res['restaurant'],$res['online'],$res['ID']);
-		$restaurants[$id] = $restaurant;		
+		$restaurant=new Restaurant($res['email'],$res['restaurant'],$res['online'],$res['id']);
+		array_push($restaurants, $restaurant);
 		}
 	return $restaurants;	
 	}
 $restaurants = get_restaurants();
+
 // count number of restaurant objects;
 $NRestaurants =count($restaurants);
 //here we are getting a list of emails associated with shop managers, a particular user profile from woocommerce.		
@@ -183,15 +190,24 @@ $query = "SELECT user_email
 	JOIN wp_usermeta on wp_users.ID=wp_usermeta.user_id 
 	WHERE wp_usermeta.meta_key='wp_capabilities' 
 	AND wp_usermeta.meta_value LIKE '%shop_manager%'";
-$shop_managers = $wpdb->get_results($query);
+
+$stmt = $con->prepare($query);
+$stmt->execute();
+$shop_managers = $stmt->get_result();
+
+#$shop_managers = $wpdb->get_results($query);
 		
 //we also want to get emails that are already associated with restaurants
 $query = "SELECT email FROM wp_restaurants";
-$used = $wpdb->get_results($query);
+$stmt = $con->prepare($query);
+$stmt->execute();
+$used = $stmt->get_result();
+
+#$used = $wpdb->get_results($query);
 $emails = array();
-		
+	
 foreach ($used as $e){
-	array_push($emails, $e->email);
+	array_push($emails, $e['email']);
 	}
 ?>
 <h2>Restaurant Form</h2>
@@ -204,12 +220,12 @@ foreach ($used as $e){
 <option placeholder value="">Select Email Address</option>
 <?php
 foreach ($shop_managers as $email){
-	if ($email->user_email == $selected) //if editing, email will already be selected
-		echo '<option selected value =' . $email->user_email . '>' . $email->user_email . '</option>';
-	else if (in_array($email->user_email, $emails)) //if already associated with a restaurant, email will be unable to be chosen
-		echo '<option disabled value =' . $email->user_email . '>' . $email->user_email . '</option>';
+	if ($email['user_email'] == $selected) //if editing, email will already be selected
+		echo '<option selected value =' . $email['user_email'] . '>' . $email['user_email'] . '</option>';
+	else if (in_array($email['user_email'], $emails)) //if already associated with a restaurant, email will be unable to be chosen
+		echo '<option disabled value =' . $email['user_email'] . '>' . $email['user_email'] . '</option>';
 	else // otherwise, all is good
-		echo '<option value =' . $email->user_email . '>' . $email->user_email . '</option>';		
+		echo '<option value =' . $email['user_email'] . '>' . $email['user_email'] . '</option>';		
 }
 ?>
 </select><br>
