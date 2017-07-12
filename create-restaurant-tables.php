@@ -1,6 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Restaurant Forme</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
 <style>
- form#restaurant-form fieldset {
+
+.center{
+	margin: 0 auto;
+}
+
+form#restaurant-form fieldset {
      width: 350px;
      display: inline-block;
  }
@@ -36,7 +52,6 @@ $con->set_charset("utf8");
 
 include_once("getemails.php");
 include_once("getRestaurants.php");
-
 
 if (isset($_GET)){
 	$id= $_GET['id'];
@@ -94,77 +109,69 @@ if (isset($_GET)){
  
 </script>
 
-<script>
-// Attach a submit handler to the form
-$(document).ready(function(){
-	$( "#restaurant-form" ).submit(function( event ) {
-		// Stop form from submitting normally
-		event.preventDefault();
-		alert("testing");
-		// Get some values from elements on the page:
-		alert("again");
-		// Send the data using post	
-		data = { 
-			restaurant: $("#restaurant").val(), 
-			email: $("#email").val(), 
-			submitChanges: $("#submitChanges").val(),
-			};
-		
-		var href = window.location.href;
-		var dir = href.substring(0, href.lastIndexOf('/')) + "/";
-		var url =  dir + "restaurant-changes.php";
-		alert(url); 		
-		$.ajax(url, {
-		    method: 'PUT',
-		    contentType: 'application/json',
-		    processData: false,
-		    data: JSON.stringify(data)
-		})
-		.then(
-		    function success(userInfo) {
-		    	alert("success");
-		        // userInfo will be a JavaScript object containing properties such as
-		        // name, age, address, etc
-		    });
+<body>
 
-	});
-});
-</script>
+<header>
 
-<div id="result"></div>
+<h1>Restaurant Delivery Service</h1>
+<h2>Interface for food delivery app</h2>
+</header>
 
-<h2>Restaurant Form</h2>
-<form name="submit_restaurant_info" method="post" id="restaurant-form">
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">Food Delivery Service</a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li class="active"><a href="#">Home</a></li>
+      <li><a href="create-restaurant-tables.php">Restaurant Form</a></li>
+      <li><a href="order-table.php">Delivery Order Form</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="jumbotron text-center">
+
+<h1>Restaurant Form</h1>
+<p>Use this form to associate Shop Manager email addresses with associated restaurants</p>
+</div>
+<div class="container center">
+
+<form name="submit_restaurant_info" method="post" id="restaurant-form" class="form-horizontal">
 <fieldset>
+
 <legend>Insert or update restaurant</legend>
-<label for="restaurant">Restaurant: </label><input type="text" name="restaurant" id="restaurant" value="<?php echo $row['restaurant'] ?> "></input><br>
+<label for="restaurant" >Restaurant: </label>
+<input type="text" name="restaurant" id="restaurant" placeholder="Enter Restaurant" value="<?php echo $row['restaurant'] ?> "></input>
 <label for"email">Email: <label><select name="email" id="email" >
 <option placeholder value="">Select Email Address</option>
 
 <?php
 
-foreach ($shop_managers as $email){
-	if ($_GET['email'] == $email->user_email)
-		echo '<option selected value =' . $email->user_email . '>' . $email->user_email . '</option>';
-	else if ($email->disabled == 'yes') //if already associated with a restaurant, email will be unable to be chosen
-		echo '<option disabled value =' . $email->user_email . '>' . $email->user_email . '</option>';
+foreach ($emails as $email){
+	if ($_GET['email'] == $email['email'])
+		echo '<option selected value =' . $email['email'] . '>' . $email['email'] . '</option>';
+	else if ($email['disabled'] == 'yes') //if already associated with a restaurant, email will be unable to be chosen
+		echo '<option disabled value =' . $email['email'] . '>' . $email['email'] . '</option>';
 	else // otherwise, all is good
-		echo '<option value =' . $email->user_email . '>' . $email->user_email . '</option>';		
+		echo '<option value =' . $email['email'] . '>' . $email['email'] . '</option>';		
 }
 ?>
 
 
 </select><br>
+
 <input type="hidden" name="ID" value = <?php echo $id ?> >
 <br>
 <?php
 if ($button == 'edit') echo '<button id="submit" name="submitChanges" value="update">Update</button>';
 else if ($button == 'delete') echo '<button id="submit" name="submitChanges" value="delete">Delete</button>';
 else echo '<button id="submit" name="submitChanges" value="insert">New</button>';
-echo '<br>';
+echo '<br><br>';
+
 ?>
 
-<b>Note</b>: password will be randomly generated and emailed to the client
+<p class="text-center text-info">Password will be randomly generated and emailed to the client</p>
 </fieldset>
 
 </form>
@@ -176,7 +183,7 @@ if ($NRestaurants != 0){echo $NRestaurants . ' restaurants are available<br>'; }
 else {echo 'No restaurants avaliable<br>'; }
 echo '</p>';
 ?>
-<table id="restaurantTable">
+<table id="restaurantTable" class="table">
 <thead><tr><th>Edit&#47;Delete</th><th>Restaurant</th><th>Email</th><th>Online</th></tr></thead>
 <tbody>
 <?php
@@ -188,6 +195,7 @@ foreach ($restaurants as $r){
 	echo '</td>';
 	echo '<td class="restaurant">' . str_replace("\'", '&#8217;', $r->restaurant) . '</td>';
 	echo '<td class="email">' . $r->email . '</td>';
+	// green circle indicates that the user is online, red that they are not
 	echo '<td>';
 	if ($r->online==1) {echo '<img width="16" alt="online" title="online" height="16" src="images/green-circle.png">';}
 	else {echo '<img width="16" height="16"  alt="offline" title="offline" src="images/transparent-red.png">';}
@@ -198,8 +206,13 @@ foreach ($restaurants as $r){
 </tbody>
 </table>
 
+</label>
+
+</body>
 
 <?php
+
+//what I originally used to update the form after a restaurant had been submitted, updated, or deleted, before deciding to play with AJAX
 
 /*if (isset($_POST)){
 	if (isset($_POST['ID'])){
@@ -256,5 +269,43 @@ foreach ($restaurants as $r){
 	}
 }*/
 $con->close();
+?>
+
+<script>
+// AJAX to update form
+// Attach a submit handler to the form
+$(document).ready(function(){
+	$( "#restaurant-form" ).submit(function( event ) {
+		// Stop form from submitting normally
+		event.preventDefault();
+			// Send the data using post	
+		data = { 
+			restaurant: $("#restaurant").val(), 
+			email: $("#email").val(), 
+			submitChanges: $("#submitChanges").val(),
+			};
+		
+		var href = window.location.href;
+		var dir = href.substring(0, href.lastIndexOf('/')) + "/";
+		var url =  dir + "restaurant-changes.php";
+		$.ajax(url, {
+		    method: 'PUT',
+		    contentType: 'application/json',
+		    processData: false,
+		    data: JSON.stringify(data)
+		})
+		.then(
+		    function success(userInfo) {
+		    	alert("success");
+		        // userInfo will be a JavaScript object containing properties such as
+		        // name, age, address, etc
+		    });
+
+	});
+});
+</script>
+
+
+</html>
 
 
