@@ -12,6 +12,7 @@ $stmt = $con->prepare($query);
 $stmt->execute();		
 $shop_managers = $stmt->get_result();		
 //we also want to get emails that are already associated with restaurants
+//those will be disabled in the drop down so that they cannot be associated with another restaurant
 $query = "SELECT email FROM wp_restaurants";
 #$results = $wpdb->get_results($query);
 $stmt = $con->prepare($query);
@@ -19,7 +20,7 @@ $stmt->execute();
 $results = $stmt->get_result();
 $used = array();
 foreach ($results as $r){
-	array_push($used, $r->email);
+	array_push($used, $r['email']);
 }
 
 $emails = array();
@@ -27,8 +28,9 @@ $emails = array();
 foreach ($shop_managers as $s){
 	$email = $s['user_email'];
 	$id = $s['ID'];
-	if (in_array($email, $used)){ $s['disabled'] = 'yes'; }
-	else { $s['disabled'] = 'no'; }
+	
+	if (in_array($email, $used)){ $disabled = 'yes'; }
+	else { $disabled = 'no'; }
 	
 	#$user = array('id'=>$id, 'email'=>$email, 'selected'=>$selected)
 	array_push($emails, array('id'=>$id, 'email'=>$email, 'disabled'=>$disabled));
