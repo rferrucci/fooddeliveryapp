@@ -28,7 +28,6 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
 	$stmt->bind_param('ssd',$note,$update,$order_ID);
 
 	/* execute query */
-  
 	try {
 		$stmt->execute();
 		echo "Successfully Received";
