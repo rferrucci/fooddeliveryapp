@@ -38,6 +38,4 @@ foreach ($shop_managers as $s){
 
 #echo json_encode(array("emails"=>$emails));
 #$emails = json_encode($emails);
-
 #echo $emails;
-
