@@ -11,7 +11,6 @@ a wordpress database. The app enabled the restaurant clients of her food deliver
  */
 
 include_once('db_file.php');
-
 $con = mysqli_connect(DB_HOST,DB_USER,DB_PASSWORD,DB_NAME) or die('Unable to Connect');
 
 if($_SERVER['REQUEST_METHOD']=='POST'){
