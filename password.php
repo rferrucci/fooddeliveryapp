@@ -29,7 +29,6 @@ function random_str(
 
 $msg = 'your password for the app is ' .$password .'.';
 $msg .= 'use this email for logging in.';
-
 echo $hash */
 
 //
