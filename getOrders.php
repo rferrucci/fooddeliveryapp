@@ -12,20 +12,27 @@ listed on the backend until client delivery service closes the order.
  * @author     Ronald R. Ferrucci
  * @copyright  2017 Ronald R. Ferrucci
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
-
  */
-
 //connect to WordPress database
 require_once('db_file.php');
-
 $con = new mysqli(DB_HOST,DB_USER,DB_PASSWORD,DB_NAME);
-
 if (mysqli_connect_errno($con))
 {
    echo "Failed to connect to MySQL: " . mysqli_connect_error();
 }
-
 $con->set_charset("utf8");
+
+$orders = getJSON();
+//echo json_encode($orders[0]);
+echo json_encode(array("orders"=>$orders),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+
+/*$orders = json_encode(array("orders"=>$orders),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);	
+$orders = json_decode($orders, true);
+
+foreach ($orders['orders'] as $order ){
+	print_r($order);
+}*/
+
 
 function getAdditionalOrderInfo($product_id,$item_id,$add1){
 	// Will look for other information regarding the order, $add1 is how it is found in wp_postmeta (addons, product attributes, etc)
@@ -59,17 +66,13 @@ function getAdditionalOrderInfo($product_id,$item_id,$add1){
                 $results = mysqli_query($con,$query);
                 
                 //$add = mysqli_fetch_array($results);
-
                 //$order_items .= '*** ' . $addon . '-' . $add['meta_value'] . '<br>';
-
 		$order_items .= '*** ' . $addon . ': ';
 		while($add = $results->fetch_assoc()){
-
 		    $order_items .=  $add['meta_value'] . ', ';
 		    }
 	    	$order_items = trim($order_items, " ,");	
             	$order_items .= '<br>';
-
                 }
             }
             return $order_items;
@@ -87,10 +90,8 @@ function getOrderItems($order_id){
 		
  	/* bind parameters for markers */
 	$stmt->bind_param("d", $order_id);
-
 	/* execute query */
 	$stmt->execute();
-
 	/* bind result variables */
 	$items = $stmt->get_result();
 	
@@ -104,7 +105,6 @@ function getOrderItems($order_id){
 				
 		//ignore taxes and fees
 	        if ($item_name=='US-LA-TAX-1' || $item_name=='Delivery Fee' || $item_name=='Credit Card Processing Fee') continue;	
-
 		// quantity, or number of each item
 		$query = "SELECT meta_value FROM wp_woocommerce_order_itemmeta
 			WHERE order_item_id=?
@@ -126,7 +126,6 @@ function getOrderItems($order_id){
 	            WHERE order_item_id=? 
 	            AND meta_key='_product_id'
 	            ";    	
-
 		$stmt = $con->prepare($query);
 		$stmt->bind_param("d", $item_id);
 		$stmt->execute();
@@ -134,16 +133,15 @@ function getOrderItems($order_id){
 		$stmt->fetch();
 		$stmt->close();
 		        
-        	if (is_null($product_id)==1) continue;
+        if (is_null($product_id)==1) continue;
 		//some order items have lists of ingredients, this part fetches them        
-	        $query="SELECT meta_value FROM wp_woocommerce_order_itemmeta WHERE order_item_id=?
+	    $query="SELECT meta_value FROM wp_woocommerce_order_itemmeta WHERE order_item_id=?
 	    	        AND meta_key LIKE '%Ingredients%'";
 	        
-        	$stmt = $con->prepare($query);
+       	$stmt = $con->prepare($query);
 		$stmt->bind_param("d", $item_id);
 		$stmt->execute();
 		$results = $stmt->get_result();
-
 		$stmt->close();
 	        $results = mysqli_query($con,$query);
 	        
@@ -164,49 +162,49 @@ function getOrderItems($order_id){
 	        //get addons, fries, sour cream, etc.    
 		$order_items .= getAdditionalOrderInfo($product_id,$item_id,'_product_addons');
 		}
-	        $query="SELECT * FROM wp_order_status WHERE order_id=$order_id";
-	        $results = mysqli_query($con,$query);
-	        $requests = mysqli_fetch_assoc($results);
+		$query="SELECT * FROM wp_order_status WHERE order_id=$order_id";
+		$results = mysqli_query($con,$query);
+		$requests = mysqli_fetch_assoc($results);
+
+		$order_items .= '<br/>SPECIAL REQUESTS: ' . $requests['requests'];   
 	
-	        $order_items .= '<br/>SPECIAL REQUESTS: ' . $requests['requests'];   
-		
-	        return $order_items;
+		return $order_items;
 	}
-
-
 function getCustomer($order_id){
 	//receives customer information for restaurant, including address and phone number
 	global $con;
-
 	$query = "SELECT meta_value FROM wp_postmeta WHERE post_id=$order_id AND meta_key='_billing_last_name'";
 	$result= mysqli_query($con,$query);
 	$row = mysqli_fetch_assoc($result);
-	$lastname = $row['meta_value'];
+	//$lastname = $row['meta_value'];
+	$lastname = "LastName";
 	
-
 	$query = "SELECT meta_value FROM wp_postmeta WHERE post_id=$order_id AND meta_key='_billing_first_name'";
 	$result= mysqli_query($con,$query);
 	$row = mysqli_fetch_assoc($result);
-	$firstname = $row['meta_value'];
+	//$firstname = $row['meta_value'];
+	$firstname = "FirstName";
 	
 	$query = "SELECT meta_value FROM wp_postmeta WHERE post_id=$order_id AND meta_key='_billing_address_1'";
 	$result= mysqli_query($con,$query);
 	$row = mysqli_fetch_assoc($result);
-	$add1 = $row['meta_value'];
+	//$add1 = $row['meta_value'];
+	$add1 = "1 This is my address";
 	
 	$query = "SELECT meta_value FROM wp_postmeta WHERE post_id=$order_id AND meta_key='_billing_address_2'";
 	$result= mysqli_query($con,$query);
 	$row = mysqli_fetch_assoc($result);
-	$add2 = $row['meta_value'];
+	//$add2 = $row['meta_value'];
+	$add2 = "but not really apt 1";
 	
 	$query = "SELECT meta_value FROM wp_postmeta WHERE post_id=$order_id AND meta_key='_billing_phone'";
 	$result= mysqli_query($con,$query);
 	$row = mysqli_fetch_assoc($result);
-	$phone = $row['meta_value'];
+	//$phone = $row['meta_value'];
+	$phone = "555-555-5555";
 	
 	return $firstname . " " . $lastname . "<br>" . $add1 . "<br>" . $add2 . "<br>" . $phone;
 }
-
 function getNote($order_id){
 	// this function just receives special instructions from the delivery service for the restaurant
 	global $con;
@@ -216,7 +214,6 @@ function getNote($order_id){
 	$row = mysqli_fetch_assoc($result);
 	return $row['note'];
 	}
-
 function getJSON(){
 	//obtains order and customer info from the WordPress database and submits to the app in json format
 	global $con;
@@ -224,31 +221,28 @@ function getJSON(){
 	//get email address from url
     	$email=$_GET['rid'];
     	//add prepare statements and the like
-
 	//get restaurant id for orders from email address
 	//did it this way in case email address associated with restaurant changes, and figure they would remember their email address before
 	//restaurant id
     	$query= "SELECT id FROM wp_restaurants
     	WHERE email= ?
 	";
-
 	$stmt = $con->prepare($query);
 	$stmt->bind_param('s', $email);
 	$stmt->execute();
-    	$stmt->bind_result($rid);
-    	$stmt->fetch();
+    $stmt->bind_result($rid);
+    $stmt->fetch();
 	
 	$stmt->close();
-
 	//get open orders for the restaurant that have no been "closed" on client's end 
 	$query= "SELECT * FROM wp_order_status
 	    	WHERE restaurant_id=?
 		AND status <> 'closed'
+		OR status <> 'completed'
 		ORDER BY 'order_id' ASC
 		";
 	
 	$stmt = $con->prepare($query);
-
 	$stmt->bind_param('s', $rid);
 	$stmt->execute();
 	$result = $stmt->get_result();
@@ -288,26 +282,29 @@ function getJSON(){
 	
 	$stmt->close();
 	$con->close();
-	echo json_encode(array("result"=>$orders),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+	
+	return $orders;
 	
 	}
 
-if (isset($_GET["rid"]) && (isset($_GET["loggedin"]))) {
+
+/*if (isset($_GET["rid"]) && (isset($_GET["loggedin"]))) {
 	//checks for restaurant id, here it is the email associated with their account.
 	//gets all information regarding orders and submits as json to the app
-	getJSON();
-}
-
-else if (isset($_GET["rid"]) && (isset($_GET["neworders"]))) {
+		
+	$orders = getJSON();
+	//echo json_encode($orders[0]);
+	echo json_encode(array("result"=>$orders),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);	
+	
+}*/
+/*else if (isset($_GET["rid"]) && (isset($_GET["neworders"]))) {
 	//checks for new orders that have not been sent to the restaurant yet. Message pops up on app that alerts restaurant to new orders
 	global $con;
     	$email=$_GET['rid'];
     	//add prepare statements and the like
-
     	$query= "SELECT id FROM wp_restaurants
     	WHERE email= ?
 	";
-
 	$stmt = $con->prepare($query);
 	$stmt->bind_param('s', $email);
 	$stmt->execute();
@@ -323,21 +320,18 @@ else if (isset($_GET["rid"]) && (isset($_GET["neworders"]))) {
 	$stmt->bind_param('s', $rid);
 	$stmt->execute();
     	$stmt->store_result();
-
 	echo $stmt->num_rows;
 	$stmt->close();
-	}
-
-else if (isset($_GET["rid"]) && (isset($_GET["lateorders"]))) {
+	}*/
+	
+/*else if (isset($_GET["rid"]) && (isset($_GET["lateorders"]))) {
 	//checks for orders that have been sent to the restaurant and notifies them that it has been over 5 minutes and they have not acknowledged receipt yet
 	global $con;
     	$email=$_GET['rid'];
     	//add prepare statements and the like
-
     	$query= "SELECT id FROM wp_restaurants
     	WHERE email= ?
 	";
-
 	$stmt = $con->prepare($query);
 	$stmt->bind_param('s', $email);
 	$stmt->execute();
@@ -347,27 +341,23 @@ else if (isset($_GET["rid"]) && (isset($_GET["lateorders"]))) {
     	
     	date_default_timezone_set('America/Chicago');
 	$time = date('H:i:s');
-
 	
 	$query= "SELECT TIMEDIFF(CURTIME(), timeOrderSent)+0 FROM wp_order_status
 	    	WHERE restaurant_id=?
 		AND status = 'sent'
 		AND TIMEDIFF(CURTIME(), timeOrderSent)+0 > 500";
-
 	$stmt = $con->prepare($query);
 	
 	$stmt->bind_param('s',$rid);
 	$stmt->execute();
 	   $result = $stmt->get_result();
-
-    	/* now you can fetch the results into an array - NICE */
-    	while ($myrow = $result->fetch_assoc()) {
-
+      	while ($myrow = $result->fetch_assoc()) {
         	print_r($myrow);
-
     }
 	
 	$stmt->close();
-}
+}*/
+
+
 
 ?>
