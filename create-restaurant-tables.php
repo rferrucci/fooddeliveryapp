@@ -7,10 +7,26 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link href="https://fonts.googleapis.com/css?family=Bellefair|Fresca" rel="stylesheet">
 </head>
 
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
-<style>
+
+<style type="text/css">  
+.center-block {  
+    width:250px;  
+    padding:10px;  
+}  
+
+header h1 {
+	font-family: Fresca;
+	text-align:center;
+}
+
+header h2 {
+	font-family: Bellefair;
+	text-align:center;
+}
 
 .center{
 	margin: 0 auto;
@@ -68,8 +84,6 @@ if (isset($_GET)){
 	
 }
 
-
-
 ?>
 
 <script>
@@ -88,8 +102,6 @@ if (isset($_GET)){
 
   	$.getJSON('getemails.php', function (data) {
 	   	var selected = $.urlParam('email');
-	
-	
 	      	var users = data.emails.map(function (user) {
 	      		if (selected != null){var email = '<option selected value =' + user.email  +'>' +  user.email + '</option>'; }
 		        else if (user.disabled == 'yes') {var email = '<option disabled value =' + user.email  +'>' +  user.email + '</option>';}
@@ -135,46 +147,46 @@ if (isset($_GET)){
 <h1>Restaurant Form</h1>
 <p>Use this form to associate Shop Manager email addresses with associated restaurants</p>
 </div>
-<div class="container center">
 
-<form name="submit_restaurant_info" method="post" id="restaurant-form" class="form-horizontal">
-<fieldset>
-
-<legend>Insert or update restaurant</legend>
-<label for="restaurant" >Restaurant: </label>
-<input type="text" name="restaurant" id="restaurant" placeholder="Enter Restaurant" value="<?php echo $row['restaurant'] ?> "></input>
-<label for"email">Email: <label><select name="email" id="email" >
-<option placeholder value="">Select Email Address</option>
-
-<?php
-
-foreach ($emails as $email){
-	if ($_GET['email'] == $email['email'])
-		echo '<option selected value =' . $email['email'] . '>' . $email['email'] . '</option>';
-	else if ($email['disabled'] == 'yes') //if already associated with a restaurant, email will be unable to be chosen
-		echo '<option disabled value =' . $email['email'] . '>' . $email['email'] . '</option>';
-	else // otherwise, all is good
-		echo '<option value =' . $email['email'] . '>' . $email['email'] . '</option>';		
-}
-?>
-
-
-</select><br>
-
-<input type="hidden" name="ID" value = <?php echo $id ?> >
-<br>
-<?php
-if ($button == 'edit') echo '<button id="submit" name="submitChanges" value="update">Update</button>';
-else if ($button == 'delete') echo '<button id="submit" name="submitChanges" value="delete">Delete</button>';
-else echo '<button id="submit" name="submitChanges" value="insert">New</button>';
-echo '<br><br>';
-
-?>
-
-<p class="text-center text-info">Password will be randomly generated and emailed to the client</p>
-</fieldset>
-
-</form>
+<div class="container">
+    <form name="submit_restaurant_info" method="post" id="restaurant-form" class="form-horizontal">
+    <fieldset>
+    
+    <legend>Insert or update restaurant</legend>
+    <p><label for="restaurant" >Restaurant: </label>
+    <input type="text" name="restaurant" id="restaurant" placeholder="Enter Restaurant" value="<?php echo $row['restaurant'] ?> "></input></P>
+    <p><label for"email">Email: </label><select name="email" id="email" >
+    <option placeholder value="">Select Email Address</option>
+    
+    <?php
+    
+    foreach ($emails as $email){
+        if ($_GET['email'] == $email['email'])
+            echo '<option selected value =' . $email['email'] . '>' . $email['email'] . '</option>';
+        else if ($email['disabled'] == 'yes') //if already associated with a restaurant, email will be unable to be chosen
+            echo '<option disabled value =' . $email['email'] . '>' . $email['email'] . '</option>';
+        else // otherwise, all is good
+            echo '<option value =' . $email['email'] . '>' . $email['email'] . '</option>';		
+    }
+    ?>
+    
+    
+    </select></p>
+    
+    <input type="hidden" name="ID" value = <?php echo $id ?> >
+    <br>
+    <?php
+    if ($button == 'edit') echo '<button id="submit" name="submitChanges" value="update">Update</button>';
+    else if ($button == 'delete') echo '<button id="submit" name="submitChanges" value="delete">Delete</button>';
+    else echo '<button id="submit" name="submitChanges" value="insert">New</button>';
+    echo '<br><br>';
+    
+    ?>
+    
+    <p class="text-center text-info">Password will be randomly generated and emailed to the client</p>
+    </fieldset>
+    
+    </form>
 
 <?php
 
@@ -279,26 +291,23 @@ $(document).ready(function(){
 		// Stop form from submitting normally
 		event.preventDefault();
 			// Send the data using post	
-		data = { 
+		alert("submit");
+		var resData = { 
 			restaurant: $("#restaurant").val(), 
 			email: $("#email").val(), 
 			submitChanges: $("#submitChanges").val(),
 			};
-		
 		var href = window.location.href;
 		var dir = href.substring(0, href.lastIndexOf('/')) + "/";
-		var url =  dir + "restaurant-changes.php";
-		$.ajax(url, {
-		    method: 'PUT',
-		    contentType: 'application/json',
-		    processData: false,
-		    data: JSON.stringify(data)
+		var url =  dir + "process-restaurant.php";
+		alert(url);
+		$.get(url, {
+		   data: resData
 		})
 		.then(
 		    function success(userInfo) {
 		    	alert("success");
-		        // userInfo will be a JavaScript object containing properties such as
-		        // name, age, address, etc
+
 		    });
 
 	});
