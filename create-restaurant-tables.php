@@ -159,7 +159,6 @@ if (isset($_GET)){
     <option placeholder value="">Select Email Address</option>
     
     <?php
-    
     foreach ($emails as $email){
         if ($_GET['email'] == $email['email'])
             echo '<option selected value =' . $email['email'] . '>' . $email['email'] . '</option>';
