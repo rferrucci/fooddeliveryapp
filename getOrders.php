@@ -33,7 +33,6 @@ foreach ($orders['orders'] as $order ){
 	print_r($order);
 }*/
 
-
 function getAdditionalOrderInfo($product_id,$item_id,$add1){
 	// Will look for other information regarding the order, $add1 is how it is found in wp_postmeta (addons, product attributes, etc)
 	// $add2 is where it is found in the order
