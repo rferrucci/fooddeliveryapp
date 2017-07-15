@@ -23,7 +23,6 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
 	$sql = "UPDATE wp_restaurants SET online=0 WHERE email = ?";
 	$stmt = $con->prepare($sql);
 	$stmt-> bind_param('s', $email);
-	
 	$stmt-> execute();
 	
 	if ($stmt->affected_rows != 0){
