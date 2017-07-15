@@ -1,0 +1,53 @@
+<html>
+
+   <head>
+      <title>Order App Demonstration</title>
+      <meta name="description" content="Demonstration of the food delivery order app I built for a client. Uses Ajax to access order data from the php file that the app uses to access orders from the order database">
+      <script type = "text/javascript" 
+         src = "https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+		
+      <script type = "text/javascript" language = "javascript">
+         $(document).ready(function() {
+            $("#driver").click(function(event){
+	               $.getJSON("http://www.ronaldrferrucci.com/fooddelivery/getOrders.php", function(Orders) {
+						$.each( Orders.orders, function (index) {
+							$('#orders').append('<p> Order ID: ' + this.id + '</p>');
+							$('#orders').append('<p> Customer: ' + this.customer + '</p>');
+							$('#orders').append('<p> Order: ' + this.order + '</p>');
+							$('#orders').append('<p> Special Notes: ' + this.note + '</p>');
+							$('#orders').append('<hr>');
+					  });
+
+               });
+					
+            });
+         });
+      </script>
+
+<style>
+
+hr { 
+    width: 250px;
+	margin-left:0;
+    text-align:left;
+    
+} 
+}
+
+</style>
+
+   </head>
+	
+   <body>
+	
+      <p>Click on the button to load orders file</p>
+		
+      <div id = "orders" style = "background-color:#eee;">
+         <h1>Orders<h1>
+      </div>
+		
+      <input type = "button" id = "driver" value = "Load Data" />
+		
+   </body>
+	
+</html>
