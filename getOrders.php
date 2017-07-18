@@ -315,7 +315,7 @@ function getJSON(){
     	//add prepare statements and the like
     	$query= "SELECT id FROM wp_restaurants
     	WHERE email= ?
-	";
+	"; 
 	$stmt = $con->prepare($query);
 	$stmt->bind_param('s', $email);
 	$stmt->execute();
