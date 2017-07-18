@@ -1,5 +1,7 @@
 <?php
-//here we are getting a list of emails associated with shop managers, a particular user profile from woocommerce.
+/* Here we are getting a list of emails associated with shop managers, a particular user profile from woocommerce, and email addresses 
+that are aleady associated with restaurants.
+*/
 require_once('db_file.php');
 
 $query = "SELECT ID, user_email 
