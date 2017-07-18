@@ -1,0 +1,98 @@
+<html>
+
+<head>
+  <title>Order App Demonstration</title>
+  <meta name="description" content="Demonstration of the food delivery order app I built for a client. Uses Ajax to access order data from the php file that the app uses to access orders from the order database">  
+<script type = "text/javascript" src = "https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js">
+</script>
+
+<script type = "text/javascript" language = "javascript">
+$(document).ready(function() {      
+    $.getJSON("/fooddelivery/getOrders.php", function(Orders) {
+        $.each( Orders, function (index) {
+			/*if (index > 1){
+				return false;
+				}*/
+            var oid= this.id;
+            $('#orders').append('<form id =' + oid + '>');
+            $('#' + oid).append('<p> Order ID: ' + this.id + '</p>');
+            $('#' + oid).append('<p> Customer: ' + this.customer + '</p>');
+            $('#' + oid).append('<p> Order: ' + this.order + '</p>');
+            $('#' + oid).append('<p class="status"> Order Status: ' + this.status + '</p>');
+
+            $('#' + oid).append('<p><label for="notes"> Special Notes: <label><textarea class="notes" rows="4" cols="25"' + 
+				'placeholder="special requests">' + this.note + '</textarea></p>');
+
+				var ack = $('<input/>', { type: "button", class: "acknowledge", value: "Acknowledge Order" });
+				$('#' + oid).append(ack);
+				$('#' + oid + ' .acknowledge').bind("click", function(e) { 
+					alert(oid);
+					var url = "/fooddelivery/update_order_dem.php";
+					var order = {
+						id: oid,
+						note: "enter note here",
+						update: "acknowledged"
+					};
+					$.ajax({
+						type: "POST",
+						url: url,
+						data: order,
+						success: function() {
+							$(".status").html("acknowledged");
+							}	
+					});						
+				}); 
+            
+				var complete = $('<input/>', { type: "button", class: "complete", value: "Complete Order" });
+				$("#" + oid).append(complete);
+				
+				$('#' + oid + ' .complete').bind("click", function(e) { 
+					var url = "/fooddelivery/update_order_dem.php";
+					var order = {
+						id: oid,
+						update: "completed"
+					};
+					$.ajax({
+						type: "POST",
+						url: url,
+						data: order,
+						success: function() {
+							$('#' + oid).remove();
+							}	
+					});					
+				});
+			
+            $('#' + oid).append('<hr>');
+        });
+    
+    });
+ });
+</script>
+
+<style>
+
+hr { 
+    width: 250px;
+	margin-left:0;
+    text-align:left;
+    
+} 
+}
+
+</style>
+
+   </head>
+	
+   <body>
+	
+      <!--<p>Click on the button to load orders file</p>-->
+		
+      <div id = "orders" style = "background-color:#eee;">
+         <h1>Orders<h1>
+      </div>
+		
+      <!--<input type = "button" id = "driver" value = "Load Data" />-->
+
+   </body>
+	
+</html>
