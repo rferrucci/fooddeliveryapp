@@ -1,3 +1,16 @@
+<?php
+/**
+ * create-restaurant-tables.php
+ *
+ * Standalone version of the WordPress plugin for client's WordPress Installation, for demonstration purposes
+ *
+ * @author     Ronald R. Ferrucci
+ * @copyright  2017 Ronald R. Ferrucci
+ * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
+
+ */
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -149,44 +162,43 @@ if (isset($_GET)){
 </div>
 
 <div class="container">
-    <form name="submit_restaurant_info" method="post" id="restaurant-form" class="form-horizontal">
-    <fieldset>
+<form name="submit_restaurant_info" method="post" id="restaurant-form" class="form-horizontal">
+<fieldset>
+
+<legend>Insert or update restaurant</legend>
+<p><label for="restaurant" >Restaurant: </label>
+<input type="text" name="restaurant" id="restaurant" placeholder="Enter Restaurant" value="<?php echo $row['restaurant'] ?> "></input></P>
+<p><label for"email">Email: </label><select name="email" id="email" >
+<option placeholder value="">Select Email Address</option>
+
+<?php
+
+foreach ($emails as $email){
+if ($_GET['email'] == $email['email'])
+    echo '<option selected value =' . $email['email'] . '>' . $email['email'] . '</option>';
+else if ($email['disabled'] == 'yes') //if already associated with a restaurant, email will be unable to be chosen
+    echo '<option disabled value =' . $email['email'] . '>' . $email['email'] . '</option>';
+else // otherwise, all is good
+    echo '<option value =' . $email['email'] . '>' . $email['email'] . '</option>';		
+}
+?>
     
-    <legend>Insert or update restaurant</legend>
-    <p><label for="restaurant" >Restaurant: </label>
-    <input type="text" name="restaurant" id="restaurant" placeholder="Enter Restaurant" value="<?php echo $row['restaurant'] ?> "></input></P>
-    <p><label for"email">Email: </label><select name="email" id="email" >
-    <option placeholder value="">Select Email Address</option>
+</select></p>
     
-    <?php
-    
-    foreach ($emails as $email){
-        if ($_GET['email'] == $email['email'])
-            echo '<option selected value =' . $email['email'] . '>' . $email['email'] . '</option>';
-        else if ($email['disabled'] == 'yes') //if already associated with a restaurant, email will be unable to be chosen
-            echo '<option disabled value =' . $email['email'] . '>' . $email['email'] . '</option>';
-        else // otherwise, all is good
-            echo '<option value =' . $email['email'] . '>' . $email['email'] . '</option>';		
-    }
-    ?>
-    
-    
-    </select></p>
-    
-    <input type="hidden" name="ID" value = <?php echo $id ?> >
-    <br>
-    <?php
-    if ($button == 'edit') echo '<button id="submit" name="submitChanges" value="update">Update</button>';
-    else if ($button == 'delete') echo '<button id="submit" name="submitChanges" value="delete">Delete</button>';
-    else echo '<button id="submit" name="submitChanges" value="insert">New</button>';
-    echo '<br><br>';
-    
-    ?>
-    
-    <p class="text-center text-info">Password will be randomly generated and emailed to the client</p>
-    </fieldset>
-    
-    </form>
+<input type="hidden" name="ID" value = <?php echo $id ?> >
+<br>
+<?php
+if ($button == 'edit') echo '<button id="submit" name="submitChanges" value="update">Update</button>';
+else if ($button == 'delete') echo '<button id="submit" name="submitChanges" value="delete">Delete</button>';
+else echo '<button id="submit" name="submitChanges" value="insert">New</button>';
+echo '<br><br>';
+
+?>
+
+<p class="text-center text-info">Password will be randomly generated and emailed to the client</p>
+</fieldset>
+
+</form>
 
 <?php
 
