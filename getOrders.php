@@ -23,8 +23,8 @@ if (mysqli_connect_errno($con))
 $con->set_charset("utf8");
 
 $orders = getJSON();
-//echo json_encode($orders[0]);
-echo json_encode(array("orders"=>$orders),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+echo json_encode($orders);
+//echo json_encode(array("orders"=>$orders),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
 
 /*$orders = json_encode(array("orders"=>$orders),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);	
 $orders = json_decode($orders, true);
@@ -32,6 +32,7 @@ $orders = json_decode($orders, true);
 foreach ($orders['orders'] as $order ){
 	print_r($order);
 }*/
+
 
 function getAdditionalOrderInfo($product_id,$item_id,$add1){
 	// Will look for other information regarding the order, $add1 is how it is found in wp_postmeta (addons, product attributes, etc)
@@ -53,10 +54,9 @@ function getAdditionalOrderInfo($product_id,$item_id,$add1){
         if (is_array($array) || is_object($array))
             {
             foreach ($array as $a){
-            //for ($i=0; $i< sizeof($array); $i++){
-            	
+            	//for ($i=0; $i< sizeof($array); $i++){
             	//$addon = $array[$i]['name'];
-		$addon = $a['name'];
+				$addon = $a['name'];
 		if ($addon=='pa_refrestaurant') continue;
 		
                 $query="SELECT meta_value FROM wp_woocommerce_order_itemmeta WHERE order_item_id=$item_id
@@ -95,15 +95,15 @@ function getOrderItems($order_id){
 	$items = $stmt->get_result();
 	
 	//$items= mysqli_query($con,$query);
-	$order_items = '';
+	$order_items = '<ul>';
 	while($item = $items->fetch_assoc()) {
-	
+		
 		//receive information for each order item
 		$item_id=$item['order_item_id'];
 		$item_name=$item['order_item_name'];
 				
 		//ignore taxes and fees
-	        if ($item_name=='US-LA-TAX-1' || $item_name=='Delivery Fee' || $item_name=='Credit Card Processing Fee') continue;	
+	    if ($item_name=='US-LA-TAX-1' || $item_name=='Delivery Fee' || $item_name=='Credit Card Processing Fee') continue;	
 		// quantity, or number of each item
 		$query = "SELECT meta_value FROM wp_woocommerce_order_itemmeta
 			WHERE order_item_id=?
@@ -116,15 +116,16 @@ function getOrderItems($order_id){
 		$stmt->bind_result($qty);
 		$stmt->fetch();
 		$stmt->close();
-		//$qty = mysqli_query($con,$query);	
-		//$qty = mysqli_fetch_assoc($qty);
-		$order_items .= $qty . ' ' . $item_name . "<br />";	
+	
+		if ($qty == null){ $qty = 1; }
+	
+		$order_items .= '<li>' . $qty . ' ' . $item_name;	
         	
-        	//get product id
-	        $query = "SELECT meta_value FROM wp_woocommerce_order_itemmeta
-	            WHERE order_item_id=? 
-	            AND meta_key='_product_id'
-	            ";    	
+		//get product id
+		$query = "SELECT meta_value FROM wp_woocommerce_order_itemmeta
+			WHERE order_item_id=? 
+			AND meta_key='_product_id'
+			";    	
 		$stmt = $con->prepare($query);
 		$stmt->bind_param("d", $item_id);
 		$stmt->execute();
@@ -132,7 +133,7 @@ function getOrderItems($order_id){
 		$stmt->fetch();
 		$stmt->close();
 		        
-        if (is_null($product_id)==1) continue;
+        //if (is_null($product_id)==1) continue;
 		//some order items have lists of ingredients, this part fetches them        
 	    $query="SELECT meta_value FROM wp_woocommerce_order_itemmeta WHERE order_item_id=?
 	    	        AND meta_key LIKE '%Ingredients%'";
@@ -142,33 +143,35 @@ function getOrderItems($order_id){
 		$stmt->execute();
 		$results = $stmt->get_result();
 		$stmt->close();
-	        $results = mysqli_query($con,$query);
+	    $results = mysqli_query($con,$query);
 	        
-	        if ($results->num_rows!=0){
+	    if ($results->num_rows!=0){
 		   	$order_items .= '*** Ingredients: ' ;
-		        while($row = $results->fetch_assoc()){
-		            // ($results=null) continue;
-		            //global $row;
-		            $order_items .= $row[$i]['meta_value'] . ', ';    
-	            		}
-	            	$order_items = trim($order_items,',');
-	            	$order_items .= '<br>';
-	            	}
+			while($row = $results->fetch_assoc()){
+				$order_items .= $row[$i]['meta_value'] . ', ';    
+					}
+				$order_items = trim($order_items,',');
+				$order_items .= '<br>';
+			}
 	            
 		//here, we obtain product attributes: spice level, type (i.e., chicken, beef, tofu), etc.
 		$order_items .= getAdditionalOrderInfo($product_id,$item_id,'_product_attributes');
 		
-	        //get addons, fries, sour cream, etc.    
+	    //get addons, fries, sour cream, etc.    
 		$order_items .= getAdditionalOrderInfo($product_id,$item_id,'_product_addons');
-		}
-		$query="SELECT * FROM wp_order_status WHERE order_id=$order_id";
-		$results = mysqli_query($con,$query);
-		$requests = mysqli_fetch_assoc($results);
-
-		$order_items .= '<br/>SPECIAL REQUESTS: ' . $requests['requests'];   
-	
-		return $order_items;
+		$order_items .= '</li>';	
 	}
+	$order_items .= '</ul>';
+
+	$query="SELECT * FROM wp_order_status WHERE order_id=$order_id";
+	$results = mysqli_query($con,$query);
+	$requests = mysqli_fetch_assoc($results);
+
+	$order_items .= '<br>SPECIAL REQUESTS: ' . $requests['requests'];   
+
+	return $order_items;
+}
+	
 function getCustomer($order_id){
 	//receives customer information for restaurant, including address and phone number
 	global $con;
@@ -213,6 +216,7 @@ function getNote($order_id){
 	$row = mysqli_fetch_assoc($result);
 	return $row['note'];
 	}
+	
 function getJSON(){
 	//obtains order and customer info from the WordPress database and submits to the app in json format
 	global $con;
@@ -235,7 +239,7 @@ function getJSON(){
 	$stmt->close();
 	//get open orders for the restaurant that have no been "closed" on client's end 
 	$query= "SELECT * FROM wp_order_status
-	    	WHERE restaurant_id=?
+	    WHERE restaurant_id=?
 		AND status <> 'closed'
 		OR status <> 'completed'
 		ORDER BY 'order_id' ASC
@@ -264,17 +268,25 @@ function getJSON(){
 	 	
 		//get notes or special requests associated with the order
 		$note = getNote($order_id);
-		$status = $row['status'];
-		
-		array_push($orders, array('id' => $order_id, 'customer' => $customer, 'order'=> $order_items, 'note' => $note));
+
+		//$status = $row['status'];
+		//$note = $_POST['note'];
+		if ($row['status'] == 'sent'){
+			$status = 'received';
+		}
+		else{
+			$status = $row['status'];
+		}
+ 				
+		array_push($orders, array('id' => $order_id, 'customer' => $customer, 'order'=> $order_items, 'note' => $note, 'status' => $status));
 		date_default_timezone_set('America/Chicago');
 		$time = date('H:i:s');
 		
 		//here we update the order to say that it has been sent and set the time.
 		$query= "UPDATE wp_order_status
 			SET status='sent',timeOrderSent=NOW()
-		    	WHERE order_id = $order_id
-					";
+			WHERE order_id = $order_id
+			";
 					
 		if ($status=='submitted') $con->query($query);		
 		}
@@ -356,7 +368,5 @@ function getJSON(){
 	
 	$stmt->close();
 }*/
-
-
 
 ?>
