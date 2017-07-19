@@ -237,11 +237,12 @@ function getJSON(){
     $stmt->fetch();
 	
 	$stmt->close();
+	
 	//get open orders for the restaurant that have no been "closed" on client's end 
 	$query= "SELECT * FROM wp_order_status
 	    WHERE restaurant_id=?
-		AND status <> 'closed'
-		OR status <> 'completed'
+		AND status <> 'completed'
+		OR status <> 'closed'
 		ORDER BY 'order_id' ASC
 		";
 	
@@ -315,7 +316,7 @@ function getJSON(){
     	//add prepare statements and the like
     	$query= "SELECT id FROM wp_restaurants
     	WHERE email= ?
-	"; 
+	";
 	$stmt = $con->prepare($query);
 	$stmt->bind_param('s', $email);
 	$stmt->execute();
@@ -368,5 +369,7 @@ function getJSON(){
 	
 	$stmt->close();
 }*/
+
+
 
 ?>
