@@ -1,4 +1,32 @@
-<style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Restaurant Forme</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<link href="https://fonts.googleapis.com/css?family=Bellefair|Fresca" rel="stylesheet">
+</head>
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+
+<style type="text/css">  
+.center-block {  
+    width:250px;  
+    padding:10px;  
+}  
+
+header h1 {
+	font-family: Fresca;
+	text-align:center;
+}
+
+header h2 {
+	font-family: Bellefair;
+	text-align:center;
+}
 
 .addons{
 	font-size: 0.75em;
@@ -8,6 +36,11 @@
      width: 350px;
      display: inline-block;
  }
+
+form#order-form input, select, button, textarea{
+	float:right;
+}
+
 
  fieldset label{
      margin-right: 10px;
@@ -286,36 +319,36 @@ function delete_order( $id ) {
  */
 function close_order( $id ) {
 	global $con;
-
 	$sql = 'SELECT * FROM wp_order_status WHERE order_id=?';
 	$stmt = $con->prepare($sql);
 	$stmt->bind_param('d',$id ); 
 	$stmt->execute();
 	/* store result */
-    	$stmt->store_result();
-    	$row_count = $stmt->num_rows;
+	$stmt->store_result();
+	$row_count = $stmt->num_rows;
+	$stmt->close();
 
-    	/* close statement */
-    	
-    	$stmt->close();
-        if ($row_count == 0){
-        	$query = "INSERT INTO wp_order_status (status, order_id) VALUES ('closed',?)";
-        	
-        	$stmt = $con->prepare($query);
+	/* close statement */
+	if ($row_count == 0){
+		$query = "INSERT INTO wp_order_status (status, order_id) VALUES ('closed',?)";
+		
+		$stmt = $con->prepare($query);
 
-        	$stmt->bind_param('d',$id);
-        	if ($stmt->execute()) echo "order " . $id . " closed";
-        	$stmt->close();
-    	    }
-        else {
-    		$sql = "UPDATE wp_order_status SET status='closed' 
-    			WHERE order_id=?)";
-        	$stmt = $con->prepare($sql);
-        	$stmt->bind_param('d',$id);
-        	if ($stmt->execute()) echo "order " . $id . " closed";
-        	$stmt->close();
-	        }
-	    }
+		$stmt->bind_param('d',$id);
+		if ($stmt->execute()) echo "order " . $id . " closed";
+		}
+	else {
+		$query = "UPDATE wp_order_status SET status='closed' 
+			WHERE order_id=?)";
+		$query = "UPDATE wp_order_status SET status='closed' WHERE order_id=?";
+		$stmt = $con->prepare($query);
+
+		$stmt->bind_param('d',$id);
+		if ($stmt->execute()) echo "order " . $id . " closed";
+		}
+	$stmt->close();
+	}
+
 	
 /**
  * Returns the count of records in the database.
@@ -345,13 +378,41 @@ function record_count() {
 
 ?>
 
+<body>
+
+<header>
+
+<h1>Restaurant Delivery Service</h1>
+<h2>Interface for food delivery app</h2>
+</header>
+
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">Food Delivery Service</a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li class="active"><a href="#">Home</a></li>
+      <li><a href="create-restaurant-tables.php">Restaurant Form</a></li>
+      <li><a href="order-table.php">Delivery Order Form</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="jumbotron text-center">
+
+<h1>Order Form</h1>
+<p>Use this form to submit orders to restaurants</p>
+</div>
+
+<div class="container">
+
 <h2>Order Status</h2>
 
 <?php
 
 if (isset ($_GET['id']) || $_GET['action']=='confirm') 
 	$id == $_GET['id'];
-
 if (isset ($_GET['id']) || $_GET['action']=='close' )
 	close_order( $_GET['id'] );
 	
@@ -372,17 +433,14 @@ if ( isset( $_POST["submit_form"] ) && $_POST["restaurant"] != "") {
 	$stmt->bind_param('d',$id);
 	$stmt->execute(); 
 	$stmt->store_result();
-
 	$query = 'SELECT * FROM wp_order_status
 	        WHERE order_id=?';
 	$stmt = $con-> prepare($query);
 	$stmt->bind_param('d',$id);
 	$stmt->execute(); 
 	$stmt->store_result();
-
 	$row_count = $stmt->num_rows;
 	$stmt->close();
-
 	if ($row_count!=0){
 	    	$query="UPDATE wp_order_status
 	    		SET requests=?, restaurant_id=?, status='submitted'
@@ -397,7 +455,6 @@ if ( isset( $_POST["submit_form"] ) && $_POST["restaurant"] != "") {
 		else echo "Order #" . $id . " updated<br><br>" ;
 		$stmt->close();
 	}
-
 	else{
 		$query = "INSERT INTO wp_order_status (requests, restaurant_id, status, order_id) VALUES (?,?,'submitted',?)";
 		$stmt = $con->prepare($query);
@@ -409,18 +466,16 @@ if ( isset( $_POST["submit_form"] ) && $_POST["restaurant"] != "") {
 		}
 		else echo "Order #" . $id . " updated<br><br>" ;
 		$stmt->close();
-
 	}
 	
 	$url = site_url(). "/wp-admin/admin.php?page=add-restaurants-database";
     
 }
-
 // if the form is submitted but the name is empty
 if ( isset( $_POST["submit_form"] ) && $_POST["restaurant"] == "") 
     $html .= "<p>You need to fill the required fields.</p>";
-
 echo $html;
+
 
 
 ?>
@@ -428,8 +483,11 @@ echo $html;
 <form action="#v_hash" method="post" name="submit_order_info" id="order-form">
 <fieldset>
 <legend>Submit or Update order</legend>
-	<label for="order_id">Order Number: </label>
-	<input type="text" name="order_id" id="order_id" value="<?php echo $id; ?>" readonly><br>
+	<p><label for="order_id">Order Number: </label>
+	<input type="text" name="order_id" id="order_id" value="<?php echo $id; ?>" readonly></p>
+
+	<p><label for "restaurant">Restaurant: <label><select name="restaurant" form="order-form"><option value="">Select Restaurant</option>
+
 
 <?php
 
@@ -447,9 +505,7 @@ $stmt->bind_result($selected);
 $stmt->fetch();
 $stmt->close();
 
-$rows = $wpdb->get_col( "SELECT COUNT(*) as num_rows FROM wp_order_status WHERE order_id=$id");
-
-echo '<select name="restaurant" form="order"><option value="">Select Restaurant</option>';
+#$rows = $wpdb->get_col( "SELECT COUNT(*) as num_rows FROM wp_order_status WHERE order_id=$id");
 
 while ($restaurant = $restaurants->fetch_array()){
 	if ($restaurant['ID'] == $selected)
@@ -458,12 +514,10 @@ while ($restaurant = $restaurants->fetch_array()){
 		echo '<option value =' . $restaurant['ID'] . '>' . $restaurant['restaurant'] . '</option>';
 	}
 	
-echo '</select><br>';
-
-
 ?>
-<textarea form="order" name="requests" rows="4" cols="25" placeholder="input special instructions"></textarea>	<br>
-<input type="submit" name="submit_form" value="Submit" />
+</select></label></p>
+<p><label for="requests">Requests: <label><textarea form="order-form" name="requests" rows="4" cols="25" placeholder="input special instructions"></textarea>	</p>
+<p><input type="submit" name="submit_form" value="Submit" /></p>
 </fieldset>
 </form>
 
@@ -535,12 +589,15 @@ foreach ($orders as $o){
 	
 	$order .= '</tr>';
 	echo $order;
+
 }
 ?>
 </tbody>
 </table>
+</div>
 
+</body>
+</html>
 <?php
 $con->close();
-
 ?>
