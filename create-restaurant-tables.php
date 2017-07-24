@@ -303,7 +303,6 @@ $(document).ready(function(){
 		// Stop form from submitting normally
 		event.preventDefault();
 			// Send the data using post	
-		alert("submit");
 		var resData = { 
 			restaurant: $("#restaurant").val(), 
 			email: $("#email").val(), 
@@ -312,7 +311,6 @@ $(document).ready(function(){
 		var href = window.location.href;
 		var dir = href.substring(0, href.lastIndexOf('/')) + "/";
 		var url =  dir + "process-restaurant.php";
-		alert(url);
 		$.get(url, {
 		   data: resData
 		})
