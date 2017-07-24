@@ -411,9 +411,9 @@ function record_count() {
 
 <?php
 
-if (isset ($_GET['id']) || $_GET['action']=='confirm') 
-	$id == $_GET['id'];
-if (isset ($_GET['id']) || $_GET['action']=='close' )
+if (isset ($_GET['id']) && $_GET['action']=='confirm') 
+	$id = $_GET['id'];
+if (isset ($_GET['id']) && $_GET['action']=='close' )
 	close_order( $_GET['id'] );
 	
 if ( isset( $_POST["submit_form"] ) && $_POST["restaurant"] != "") {
