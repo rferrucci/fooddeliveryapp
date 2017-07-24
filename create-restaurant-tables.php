@@ -167,8 +167,8 @@ if (isset($_GET)){
 
 <legend>Insert or update restaurant</legend>
 <p><label for="restaurant" >Restaurant: </label>
-<input type="text" name="restaurant" id="restaurant" placeholder="Enter Restaurant" value="<?php echo $row['restaurant'] ?> "></input></P>
-<p><label for"email">Email: </label><select name="email" id="email" >
+<input type="text" required name="restaurant" id="restaurant" placeholder="Enter Restaurant" value="<?php echo $row['restaurant']?>"></input></P>
+<p><label for"email">Email: </label><select required name="email" id="email" >
 <option placeholder value="">Select Email Address</option>
 
 <?php
