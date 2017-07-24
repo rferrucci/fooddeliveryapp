@@ -484,7 +484,7 @@ echo $html;
 <fieldset>
 <legend>Submit or Update order</legend>
 	<p><label for="order_id">Order Number: </label>
-	<input type="text" name="order_id" required id="order_id" value="<?php echo $id; ?>" readonly></p>
+	<input type="text" name="order_id" form="order-form" required id="order_id" value="<?php echo $id; ?>" readonly></p>
 
 	<p><label for "restaurant">Restaurant: <label><select name="restaurant" form="order-form"><option required value="">Select Restaurant</option>
 
