@@ -3,7 +3,7 @@
 /**
  * update_order.php
  *
- * This script updates the order in the database to reflect change of status from the app user, either setting status to "recived," acknowledging 
+ * This script updates the order in the database to reflect change of status from the app user, either setting status to "received," acknowledging 
 receipt of the order, or "completed," indicated that the order has been filled. Also adds a note from the restaurant, if there is one.
  *
  * @author     Ronald R. Ferrucci
