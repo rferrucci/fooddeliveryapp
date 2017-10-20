@@ -4,7 +4,7 @@ generates a random password of random length between 8 and some maximum number, 
 a database
  */
 function random_str(
-    $max, $email, $subject, $msg
+    $max, $email, $subject, $msg,
     $keyspace = 'VnWkSCY75Fys!EL24fUoNguHabv1XPeqQ8pRcM3xz9irIjOGBDmwh@l6JZ0tTKdA'
 ) {
     $str = '';
