@@ -46,7 +46,7 @@ class Restaurant{
 			//$msg .= 'Use this email for logging into the app.';
 			//mail($email,$subject,$msg);
 		}
-		$id = $stmt->insert_id;;
+		$id = $stmt->insert_id;
 		$this->id = $id;
 		$stmt->close();	
 	}
@@ -107,8 +107,8 @@ function get_restaurants( $per_page = 5, $page_number = 1 ) {
 	$results = $stmt->get_result();
 	$restaurants = array();
 	while ($res = $results->fetch_assoc()){
-		$id=$res['ID'];
-		$restaurant=new Restaurant($res['email'],$res['restaurant'],$res['online'],$res['ID']);
+		$id=$res['id'];
+		$restaurant=new Restaurant($res['email'],$res['restaurant'],$res['online'],$res['id']);
 		$restaurants[$id] = $restaurant;		
 		}
 	return $restaurants;	
@@ -116,4 +116,5 @@ function get_restaurants( $per_page = 5, $page_number = 1 ) {
 $restaurants = get_restaurants();
 // count number of restaurant objects;
 $NRestaurants =count($restaurants);
+
 ?>
