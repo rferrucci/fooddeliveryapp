@@ -41,25 +41,29 @@ $data           = array();      // array to pass back data
 
 
 if (isset($_POST)){
-	if (isset($_POST['ID'])){
-		$id = $_POST['ID'];
+	if (isset($_POST['id'])){
+		$id = $_POST['id'];
 		}
-	if ($_POST['submitChanges'] == 'delete'){
+	if ($_POST['submitChanges'] == 'remove'){
 		$restaurants[$id]->delete();
+		//$res->delete();
+		//$restaurants[41]->delete();
 		
 	}
-	else if ($_POST['submitChanges'] == 'update'){
-		$restaurants[$id]->update($_POST['email'],$_POST['restaurant']);
+	else if ($_POST['submitChanges'] == 'edit'){
 		$email = trim($_POST['email']);
 		$restaurant = $_POST['restaurant'];		
+		$restaurants[$id]->update($_POST['email'],$_POST['restaurant']);
+	
 	}
 	else if ($_POST['submitChanges'] == 'insert'){
-		$res=new Restaurant($_POST['email'],$_POST['restaurant']);
-		$res->insert();
-		$restaurants[$res->id] = $res;
 		$email = trim($_POST['email']);
 		$restaurant = $_POST['restaurant'];
-		
+		$res=new Restaurant($_POST['email'],$_POST['restaurant']);
+		$res->insert();
+		$id = $con->insert_id;
+		//$id = 666;
+		$data['id'] = $id;
 	}
 }
 $con->close();
