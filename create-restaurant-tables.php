@@ -1,16 +1,3 @@
-<?php
-/**
- * create-restaurant-tables.php
- *
- * Standalone version of the WordPress plugin for client's WordPress Installation, for demonstration purposes
- *
- * @author     Ronald R. Ferrucci
- * @copyright  2017 Ronald R. Ferrucci
- * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
-
- */
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -41,10 +28,6 @@ header h2 {
 	text-align:center;
 }
 
-.center{
-	margin: 0 auto;
-}
-
 form#restaurant-form fieldset {
      width: 350px;
      display: inline-block;
@@ -52,7 +35,8 @@ form#restaurant-form fieldset {
 form#restaurant-form input, select, button{
 	float:right;
 }
- fieldset label{
+
+fieldset label{
      margin-right: 10px;
      position: relative;
  }
@@ -167,30 +151,44 @@ if (isset($_GET)){
 
 <legend>Insert or update restaurant</legend>
 <p><label for="restaurant" >Restaurant: </label>
-<input type="text" required name="restaurant" id="restaurant" placeholder="Enter Restaurant" value="<?php echo $row['restaurant']?>"></input></P>
+<input type="text" name="restaurant" id="restaurant" required placeholder="Enter Restaurant" placeholder= "Enter Restaurant" value="<?php echo $row['restaurant']?>"></input></P>
 <p><label for"email">Email: </label><select required name="email" id="email" >
 <option placeholder value="">Select Email Address</option>
 
 <?php
 
 foreach ($emails as $email){
-if ($_GET['email'] == $email['email'])
-    echo '<option selected value =' . $email['email'] . '>' . $email['email'] . '</option>';
-else if ($email['disabled'] == 'yes') //if already associated with a restaurant, email will be unable to be chosen
-    echo '<option disabled value =' . $email['email'] . '>' . $email['email'] . '</option>';
-else // otherwise, all is good
-    echo '<option value =' . $email['email'] . '>' . $email['email'] . '</option>';		
+    if ($_GET['email'] == $email['email'])
+        echo '<option selected value =' . $email['email'] . '>' . $email['email'] . '</option>';
+    else if ($email['disabled'] == 'yes') //if already associated with a restaurant, email will be unable to be chosen
+        echo '<option disabled value =' . $email['email'] . '>' . $email['email'] . '</option>';
+    else // otherwise, all is good
+        echo '<option value =' . $email['email'] . '>' . $email['email'] . '</option>';		
 }
 ?>
     
-</select></p>
     
-<input type="hidden" name="ID" value = <?php echo $id ?> >
+</select></p>
+
+<input type="hidden" name="id" id="id" value = <?php echo $id ?> >
 <br>
 <?php
-if ($button == 'edit') echo '<button id="submit" name="submitChanges" value="update">Update</button>';
-else if ($button == 'delete') echo '<button id="submit" name="submitChanges" value="delete">Delete</button>';
-else echo '<button id="submit" name="submitChanges" value="insert">New</button>';
+
+if ($button == 'edit') $val = "edit";
+else if ($button == 'delete') $val = "remove";
+else $val = "insert";
+
+echo '<button id="submit" name="submit">Submit</button>';
+echo '<input type="hidden" id="submitChanges" name="submitChanges" value="'. $val . '">';
+//if ($button == 'edit') echo '<button id="submitChanges" name="submitChanges" value="update">Update</button>';
+//else if ($button == 'delete') echo '<button id="submitChanges" name="submitChanges" value="delete">Delete</button>';
+//else echo '<button id="submitChanges" name="submitChanges" value="insert">New</button>';
+
+//if ($button == 'edit') echo '<input type="hidden" id="submitChanges" name="submitChanges" value="update">';
+//else if ($button == 'delete') echo '<input type="hidden" id="submitChanges" name="submitChanges" value="delete">';
+//else echo '<input type="hidden" name="submitChanges" id="submitChanges" value="insert">';
+
+
 echo '<br><br>';
 
 ?>
@@ -203,9 +201,9 @@ echo '<br><br>';
 <?php
 
 echo '<h2>Food Delivery Restaurants</h2><p>';
-if ($NRestaurants != 0){echo $NRestaurants . ' restaurants are available<br>'; }
-else {echo 'No restaurants avaliable<br>'; }
-echo '</p>';
+#if ($NRestaurants != 0){echo '<span id="Nrest">'. $NRestaurants . '<span> restaurants are available<br>'; }
+#else {echo 'No restaurants avaliable<br>'; }
+#echo '</p>';
 ?>
 <table id="restaurantTable" class="table">
 <thead><tr><th>Edit&#47;Delete</th><th>Restaurant</th><th>Email</th><th>Online</th></tr></thead>
@@ -214,7 +212,7 @@ echo '</p>';
 foreach ($restaurants as $r){
 	echo '<tr class="rid" id="rid-'. $r->id .'">';
 	
-	echo '<td><a href =' . $link . '?action=edit&id=' . $r->id . '&email=' . $r->email . '>Edit</a><br>';
+	echo '<td id=' . $r->id .'><a href =' . $link . '?action=edit&id=' . $r->id . '&email=' . $r->email . '>Edit</a><br>';
 	echo '<a href =' . $link . '?action=delete&id=' . $r->id . '&email=' . $r->email .'>Delete</a><br>';
 	echo '</td>';
 	echo '<td class="restaurant">' . str_replace("\'", '&#8217;', $r->restaurant) . '</td>';
@@ -302,7 +300,7 @@ $(document).ready(function(){
 	$( "#restaurant-form" ).submit(function( event ) {
 		// Stop form from submitting normally
 		event.preventDefault();
-			// Send the data using post	
+		// Send the data using post	
 		var resData = { 
 			restaurant: $("#restaurant").val(), 
 			email: $("#email").val(), 
@@ -311,14 +309,39 @@ $(document).ready(function(){
 		var href = window.location.href;
 		var dir = href.substring(0, href.lastIndexOf('/')) + "/";
 		var url =  dir + "process-restaurant.php";
-		$.get(url, {
-		   data: resData
-		})
-		.then(
-		    function success(userInfo) {
-		    	alert("success");
+		    $.post(url,
+			{
+				submitChanges: $("#submitChanges").val(),
+				restaurant: $("#restaurant").val(), 
+				email: $("#email").val(), 
+				submitChanges: $("#submitChanges").val(),
+				id: $("#id").val(),
+			},
+			function(data, status){
+				if ($("#id").val() == undefined){ }
+				else{ var id = $("#id").val();}
+				if ($("#submitChanges").val() == 'edit'){
+					$("#rid-" + id).find(".restaurant").html($("#restaurant").val());
+					$("#rid-" + id).find(".email").html($("#email").val());
+					alert ("Restaurant: " + $("#restaurant").val() + " updated");
+				}
+					else if ($("#submitChanges").val() == 'remove'){
+					$("#rid-" + id).remove();
+					alert ("Restaurant: " + $("#restaurant").val() + " deleted");
+				}
+					else{
+						//$("#restaurantTable").append(<tr>).attr('id
+						//', 'rid-' + '30').append(<td).attr('class', 'restaurant').text($("#restaurant").val());
+						alert ("Restaurant: " + $("#restaurant").val() + " added");
+						location.reload();
+					}
+				//alert ("Restaurant: " + $("#restaurant").val() + " updated");
+    });
+		//.then(
+		  //  function success(userInfo) {
+		    //	alert("success");
 
-		    });
+		    //});
 
 	});
 });
